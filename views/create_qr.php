@@ -49,6 +49,14 @@ require __DIR__ . '/partials/head.php';
                  required>
         </div>
 
+        <!-- Expiración -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="font-size:13px">Fecha de expiración <small class="text-muted fw-normal">(opcional)</small></label>
+          <input name="expires_at" type="datetime-local" class="form-control"
+                 value="<?php echo htmlspecialchars($_POST['expires_at'] ?? ''); ?>">
+          <small class="text-muted">Después de esta fecha, el QR mostrará un mensaje de expirado. Deja vacío para nunca expirar.</small>
+        </div>
+
         <!-- Tipo -->
         <div class="mb-4">
           <label class="form-label fw-semibold" style="font-size:13px">Tipo de contenido</label>

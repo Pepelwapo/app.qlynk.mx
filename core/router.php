@@ -7,6 +7,35 @@ require_once __DIR__.'/mail.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
+// ══════════════════════════════════════════════════════════════════
+//  Rutas públicas con slug dinámico (ANTES del switch)
+//  /m/{slug}  → menú público
+//  /c/{slug}  → catálogo público
+//  /f/{slug}  → formulario público
+// ══════════════════════════════════════════════════════════════════
+
+if (preg_match('#^/m/([a-z0-9\-]+)$#i', $uri, $m)) {
+    $slug = $m[1];
+    require __DIR__.'/../controllers/menu_view.php';
+    exit;
+}
+
+if (preg_match('#^/c/([a-z0-9\-]+)$#i', $uri, $m)) {
+    $slug = $m[1];
+    require __DIR__.'/../controllers/catalog_view.php';
+    exit;
+}
+
+if (preg_match('#^/f/([a-z0-9\-]+)$#i', $uri, $m)) {
+    $slug = $m[1];
+    require __DIR__.'/../controllers/form_view.php';
+    exit;
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  Rutas estáticas
+// ══════════════════════════════════════════════════════════════════
+
 switch ($uri) {
 
     case '/':
@@ -37,6 +66,7 @@ switch ($uri) {
         require __DIR__.'/../controllers/dashboard.php';
         break;
 
+    // ── QR Dinámicos ──
     case '/qrs':
         require __DIR__.'/../controllers/qrs.php';
         break;
@@ -61,6 +91,67 @@ switch ($uri) {
         require __DIR__.'/../controllers/static_qr.php';
         break;
 
+    // ── Menús ──
+    case '/menus':
+        require __DIR__.'/../controllers/menus.php';
+        break;
+
+    case '/menus/create':
+        require __DIR__.'/../controllers/menus_create.php';
+        break;
+
+    case '/menus/edit':
+        require __DIR__.'/../controllers/menus_edit.php';
+        break;
+
+    case '/menus/delete':
+        require __DIR__.'/../controllers/menus_delete.php';
+        break;
+
+    // ── Catálogos ──
+    case '/catalogs':
+        require __DIR__.'/../controllers/catalogs.php';
+        break;
+
+    case '/catalogs/create':
+        require __DIR__.'/../controllers/catalogs_create.php';
+        break;
+
+    case '/catalogs/edit':
+        require __DIR__.'/../controllers/catalogs_edit.php';
+        break;
+
+    case '/catalogs/delete':
+        require __DIR__.'/../controllers/catalogs_delete.php';
+        break;
+
+    // ── Formularios ──
+    case '/forms':
+        require __DIR__.'/../controllers/forms.php';
+        break;
+
+    case '/forms/create':
+        require __DIR__.'/../controllers/forms_create.php';
+        break;
+
+    case '/forms/edit':
+        require __DIR__.'/../controllers/forms_edit.php';
+        break;
+
+    case '/forms/delete':
+        require __DIR__.'/../controllers/forms_delete.php';
+        break;
+
+    case '/forms/responses':
+        require __DIR__.'/../controllers/form_responses.php';
+        break;
+
+    // ── Facturación ──
+    case '/billing':
+        require __DIR__.'/../controllers/billing.php';
+        break;
+
+    // ── Cuenta ──
     case '/verify-email':
         require __DIR__.'/../controllers/verify_email.php';
         break;

@@ -52,14 +52,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    $expires   = trim($_POST['expires_at'] ?? '');
+    $expiresAt = (!empty($expires)) ? date('Y-m-d H:i:s', strtotime($expires)) : null;
+
     $pdo->prepare("
         UPDATE qr_codes
         SET name       = ?,
             target_url = ?,
             type       = ?,
+            expires_at = ?,
             updated_at = NOW()
         WHERE id = ? AND user_id = ?
-    ")->execute([$name, $target_url, $type, $id, $_SESSION['user_id']]);
+    ")->execute([$name, $target_url, $type, $expiresAt, $id, $_SESSION['user_id']]);
 
     header('Location: /qrs/edit?id=' . $id . '&saved=1');
     exit;

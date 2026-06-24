@@ -58,15 +58,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$shortCode]);
     } while ($stmt->fetch());
 
+    $expires = trim($_POST['expires_at'] ?? '');
+    $expiresAt = (!empty($expires)) ? date('Y-m-d H:i:s', strtotime($expires)) : null;
+
     $pdo->prepare("
-        INSERT INTO qr_codes (user_id, name, short_code, target_url, type)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO qr_codes (user_id, name, short_code, target_url, type, expires_at)
+        VALUES (?, ?, ?, ?, ?, ?)
     ")->execute([
         $_SESSION['user_id'],
         $name,
         $shortCode,
         $target_url,
-        $type
+        $type,
+        $expiresAt
     ]);
 
     header('Location: /qrs?created=1');

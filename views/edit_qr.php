@@ -71,6 +71,20 @@ $f = fn(string $key): string => htmlspecialchars($fields[$key] ?? '');
                  required oninput="updatePreview()">
         </div>
 
+        <!-- Expiración -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold" style="font-size:13px">Fecha de expiración <small class="text-muted fw-normal">(opcional)</small></label>
+          <?php
+          $expiresVal = '';
+          if (!empty($qr['expires_at'])) {
+              $expiresVal = date('Y-m-d\TH:i', strtotime($qr['expires_at']));
+          }
+          ?>
+          <input name="expires_at" type="datetime-local" class="form-control"
+                 value="<?php echo htmlspecialchars($expiresVal); ?>">
+          <small class="text-muted">Deja vacío para nunca expirar.</small>
+        </div>
+
         <!-- Tipo -->
         <div class="mb-4">
           <label class="form-label fw-semibold" style="font-size:13px">Tipo de contenido</label>

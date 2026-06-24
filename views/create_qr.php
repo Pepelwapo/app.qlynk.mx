@@ -46,7 +46,7 @@ require __DIR__ . '/partials/head.php';
           <input name="name" class="form-control" id="qrName"
                  placeholder="Ej: Menú restaurante, Carta de vinos…"
                  value="<?php echo htmlspecialchars($_POST['name'] ?? ''); ?>"
-                 required oninput="updatePreview()">
+                 required>
         </div>
 
         <!-- Tipo -->
@@ -72,8 +72,7 @@ require __DIR__ . '/partials/head.php';
         <div id="fields-url" class="qr-fields">
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">URL destino</label>
-            <input name="url" class="form-control" placeholder="https://tudominio.com"
-                   oninput="updatePreview()">
+            <input name="url" class="form-control" placeholder="https://tudominio.com">
           </div>
         </div>
 
@@ -83,16 +82,14 @@ require __DIR__ . '/partials/head.php';
             <label class="form-label fw-semibold" style="font-size:13px">
               Número de WhatsApp <small class="text-muted">(con código de país)</small>
             </label>
-            <input name="wa_phone" class="form-control" placeholder="+521234567890"
-                   oninput="updatePreview()">
+            <input name="wa_phone" class="form-control" placeholder="+521234567890">
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">
               Mensaje predefinido <small class="text-muted">(opcional)</small>
             </label>
             <textarea name="wa_message" class="form-control" rows="3"
-                      placeholder="Hola, me interesa saber más…"
-                      oninput="updatePreview()"></textarea>
+                      placeholder="Hola, me interesa saber más…"></textarea>
             <div class="mt-1" style="font-size:12px;color:#888">
               Tip: puedes usar emojis 🎉🔥✅
             </div>
@@ -104,21 +101,21 @@ require __DIR__ . '/partials/head.php';
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">Correo destino</label>
             <input name="em_email" type="email" class="form-control"
-                   placeholder="contacto@empresa.com" oninput="updatePreview()">
+                   placeholder="contacto@empresa.com">
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">
               Asunto <small class="text-muted">(opcional)</small>
             </label>
             <input name="em_subject" class="form-control"
-                   placeholder="Ej: Consulta sobre productos" oninput="updatePreview()">
+                   placeholder="Ej: Consulta sobre productos">
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">
               Cuerpo del mensaje <small class="text-muted">(opcional)</small>
             </label>
             <textarea name="em_body" class="form-control" rows="3"
-                      placeholder="Hola, me comunico para…" oninput="updatePreview()"></textarea>
+                      placeholder="Hola, me comunico para…"></textarea>
           </div>
         </div>
 
@@ -126,8 +123,7 @@ require __DIR__ . '/partials/head.php';
         <div id="fields-phone" class="qr-fields" style="display:none">
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">Número de teléfono</label>
-            <input name="phone_number" class="form-control" placeholder="+521234567890"
-                   oninput="updatePreview()">
+            <input name="phone_number" class="form-control" placeholder="+521234567890">
           </div>
         </div>
 
@@ -135,15 +131,14 @@ require __DIR__ . '/partials/head.php';
         <div id="fields-sms" class="qr-fields" style="display:none">
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">Número de teléfono</label>
-            <input name="sms_phone" class="form-control" placeholder="+521234567890"
-                   oninput="updatePreview()">
+            <input name="sms_phone" class="form-control" placeholder="+521234567890">
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">
               Mensaje <small class="text-muted">(opcional)</small>
             </label>
             <textarea name="sms_message" class="form-control" rows="2"
-                      placeholder="Hola, me interesa…" oninput="updatePreview()"></textarea>
+                      placeholder="Hola, me interesa…"></textarea>
           </div>
         </div>
 
@@ -156,17 +151,15 @@ require __DIR__ . '/partials/head.php';
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">Nombre de la red (SSID)</label>
-            <input name="wifi_ssid" class="form-control" placeholder="MiRedWiFi"
-                   oninput="updatePreview()">
+            <input name="wifi_ssid" class="form-control" placeholder="MiRedWiFi">
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">Contraseña</label>
-            <input name="wifi_password" class="form-control" placeholder="••••••••"
-                   oninput="updatePreview()">
+            <input name="wifi_password" class="form-control" placeholder="••••••••">
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">Seguridad</label>
-            <select name="wifi_security" class="form-select" onchange="updatePreview()">
+            <select name="wifi_security" class="form-select">
               <option value="WPA">WPA / WPA2</option>
               <option value="WEP">WEP</option>
               <option value="nopass">Sin contraseña</option>
@@ -179,46 +172,43 @@ require __DIR__ . '/partials/head.php';
           <div class="row g-2 mb-2">
             <div class="col-6">
               <label class="form-label fw-semibold" style="font-size:13px">Nombre completo</label>
-              <input name="vc_name" class="form-control" placeholder="Juan Pérez"
-                     oninput="updatePreview()">
+              <input name="vc_name" class="form-control" placeholder="Juan Pérez">
             </div>
             <div class="col-6">
               <label class="form-label fw-semibold" style="font-size:13px">Empresa</label>
-              <input name="vc_company" class="form-control" placeholder="Mi Empresa S.A."
-                     oninput="updatePreview()">
+              <input name="vc_company" class="form-control" placeholder="Mi Empresa S.A.">
             </div>
           </div>
           <div class="mb-2">
             <label class="form-label fw-semibold" style="font-size:13px">Teléfono</label>
-            <input name="vc_phone" class="form-control" placeholder="+521234567890"
-                   oninput="updatePreview()">
+            <input name="vc_phone" class="form-control" placeholder="+521234567890">
           </div>
           <div class="mb-2">
             <label class="form-label fw-semibold" style="font-size:13px">Correo</label>
             <input name="vc_email" type="email" class="form-control"
-                   placeholder="juan@empresa.com" oninput="updatePreview()">
+                   placeholder="juan@empresa.com">
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">Sitio web</label>
-            <input name="vc_website" class="form-control" placeholder="https://..."
-                   oninput="updatePreview()">
+            <input name="vc_website" class="form-control" placeholder="https://...">
           </div>
         </div>
 
-        <!-- PDF / Social -->
+        <!-- PDF -->
         <div id="fields-pdf" class="qr-fields" style="display:none">
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">URL del PDF</label>
             <input name="pdf_url" class="form-control"
-                   placeholder="https://drive.google.com/file/..." oninput="updatePreview()">
+                   placeholder="https://drive.google.com/file/...">
           </div>
         </div>
 
+        <!-- Social -->
         <div id="fields-social" class="qr-fields" style="display:none">
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">URL del perfil</label>
             <input name="social_url" class="form-control"
-                   placeholder="https://instagram.com/miusuario" oninput="updatePreview()">
+                   placeholder="https://instagram.com/miusuario">
           </div>
         </div>
 
@@ -226,30 +216,26 @@ require __DIR__ . '/partials/head.php';
         <div id="fields-event" class="qr-fields" style="display:none">
           <div class="mb-2">
             <label class="form-label fw-semibold" style="font-size:13px">Título del evento</label>
-            <input name="ev_title" class="form-control" placeholder="Inauguración de sucursal"
-                   oninput="updatePreview()">
+            <input name="ev_title" class="form-control" placeholder="Inauguración de sucursal">
           </div>
           <div class="row g-2 mb-2">
             <div class="col-6">
               <label class="form-label fw-semibold" style="font-size:13px">Inicio</label>
-              <input name="ev_start" type="datetime-local" class="form-control"
-                     oninput="updatePreview()">
+              <input name="ev_start" type="datetime-local" class="form-control">
             </div>
             <div class="col-6">
               <label class="form-label fw-semibold" style="font-size:13px">Fin</label>
-              <input name="ev_end" type="datetime-local" class="form-control"
-                     oninput="updatePreview()">
+              <input name="ev_end" type="datetime-local" class="form-control">
             </div>
           </div>
           <div class="mb-2">
             <label class="form-label fw-semibold" style="font-size:13px">Ubicación</label>
-            <input name="ev_location" class="form-control" placeholder="Av. Insurgentes 123, CDMX"
-                   oninput="updatePreview()">
+            <input name="ev_location" class="form-control" placeholder="Av. Insurgentes 123, CDMX">
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold" style="font-size:13px">Descripción</label>
             <textarea name="ev_description" class="form-control" rows="2"
-                      placeholder="Breve descripción…" oninput="updatePreview()"></textarea>
+                      placeholder="Breve descripción…"></textarea>
           </div>
         </div>
 
@@ -262,42 +248,49 @@ require __DIR__ . '/partials/head.php';
     </div>
     </div>
 
-    <!-- ── Preview ── -->
+    <!-- ── Panel derecho: información (NO preview live) ── -->
     <div class="col-md-5">
     <div class="card border-0 shadow-sm text-center" style="border-radius:16px;position:sticky;top:20px">
     <div class="card-body p-4">
 
-      <h6 class="fw-bold mb-1" style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:.5px">
-        Vista previa
-      </h6>
-      <p style="font-size:11px;color:#aaa" class="mb-3">
-        El QR dinámico apuntará a go.qlynk.mx
+      <div style="font-size:48px;margin-bottom:8px">⚡</div>
+      <h6 class="fw-bold mb-2" style="font-size:15px">QR Dinámico</h6>
+      <p class="text-muted mb-4" style="font-size:13px;line-height:1.6">
+        Tu código QR se genera al crearlo y <strong>nunca cambia</strong>.
+        Puedes actualizar el destino cuantas veces quieras — el QR impreso sigue funcionando.
       </p>
 
-      <div id="qrPreview"
-           style="display:inline-block;padding:12px;background:#fff;border-radius:12px;
-                  border:2px dashed #e0e0e0;min-width:160px;min-height:160px">
-        <div id="qrCanvas" style="display:flex;align-items:center;justify-content:center;
-                                   width:160px;height:160px;color:#ccc;font-size:13px">
-          Llena los campos<br>para ver el preview
+      <hr class="my-3">
+
+      <div class="text-start" style="font-size:13px">
+        <div class="d-flex align-items-start gap-2 mb-3">
+          <span style="font-size:18px;min-width:24px">🔗</span>
+          <div>
+            <div class="fw-semibold">Código único y fijo</div>
+            <div class="text-muted" style="font-size:12px">El QR siempre apunta al mismo enlace corto, sin importar qué cambies en el destino.</div>
+          </div>
+        </div>
+        <div class="d-flex align-items-start gap-2 mb-3">
+          <span style="font-size:18px;min-width:24px">✏️</span>
+          <div>
+            <div class="fw-semibold">Editable en cualquier momento</div>
+            <div class="text-muted" style="font-size:12px">Cambia el destino, el tipo o el contenido sin reimprimir el QR.</div>
+          </div>
+        </div>
+        <div class="d-flex align-items-start gap-2">
+          <span style="font-size:18px;min-width:24px">📊</span>
+          <div>
+            <div class="fw-semibold">Con estadísticas de escaneo</div>
+            <div class="text-muted" style="font-size:12px">Cada escaneo queda registrado. Consulta el historial desde la lista de QRs.</div>
+          </div>
         </div>
       </div>
 
-      <div class="mt-3">
-        <button onclick="downloadPNG()" class="btn btn-outline-dark btn-sm me-2"
-                id="btnDownload" style="border-radius:8px;display:none">
-          <i class="bi bi-download me-1"></i>PNG
-        </button>
-        <button onclick="downloadSVG()" class="btn btn-outline-secondary btn-sm"
-                id="btnDownloadSvg" style="border-radius:8px;display:none">
-          <i class="bi bi-download me-1"></i>SVG
-        </button>
-      </div>
+      <hr class="my-3">
 
-      <div class="mt-3 pt-3 border-top" style="font-size:11px;color:#bbb">
+      <div class="text-muted" style="font-size:11px">
         <i class="bi bi-info-circle me-1"></i>
-        Preview del contenido destino.<br>
-        El QR real apunta a go.qlynk.mx
+        El QR y su imagen HD están disponibles después de crearlo.
       </div>
 
     </div>
@@ -309,147 +302,13 @@ require __DIR__ . '/partials/head.php';
 </main>
 </div>
 
-<!-- QRCode.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-var qrInstance = null;
-
 function switchType() {
     document.querySelectorAll('.qr-fields').forEach(el => el.style.display = 'none');
     var type = document.getElementById('qrType').value;
     var el = document.getElementById('fields-' + type);
     if (el) el.style.display = 'block';
-    updatePreview();
 }
-
-function getFieldVal(name) {
-    var el = document.querySelector('[name="' + name + '"]');
-    return el ? el.value.trim() : '';
-}
-
-function buildContent() {
-    var type = document.getElementById('qrType').value;
-    switch (type) {
-        case 'url':
-            return getFieldVal('url');
-        case 'whatsapp': {
-            var phone = getFieldVal('wa_phone').replace(/\D/g, '');
-            var msg   = encodeURIComponent(getFieldVal('wa_message'));
-            return phone ? 'https://wa.me/' + phone + (msg ? '?text=' + msg : '') : '';
-        }
-        case 'email': {
-            var em   = getFieldVal('em_email');
-            var subj = encodeURIComponent(getFieldVal('em_subject'));
-            var body = encodeURIComponent(getFieldVal('em_body'));
-            var q    = [];
-            if (subj) q.push('subject=' + subj);
-            if (body) q.push('body=' + body);
-            return em ? 'mailto:' + em + (q.length ? '?' + q.join('&') : '') : '';
-        }
-        case 'phone':
-            return getFieldVal('phone_number') ? 'tel:' + getFieldVal('phone_number') : '';
-        case 'sms': {
-            var sp  = getFieldVal('sms_phone');
-            var sm  = encodeURIComponent(getFieldVal('sms_message'));
-            return sp ? 'sms:' + sp + (sm ? '?body=' + sm : '') : '';
-        }
-        case 'wifi': {
-            var ssid = getFieldVal('wifi_ssid');
-            var pass = getFieldVal('wifi_password');
-            var sec  = getFieldVal('wifi_security') || 'WPA';
-            return ssid ? 'WIFI:S:' + ssid + ';T:' + sec + ';P:' + pass + ';;' : '';
-        }
-        case 'vcard': {
-            var vcn = getFieldVal('vc_name');
-            if (!vcn) return '';
-            return 'BEGIN:VCARD\r\nVERSION:3.0\r\nFN:' + vcn
-                + '\r\nTEL:' + getFieldVal('vc_phone')
-                + '\r\nEMAIL:' + getFieldVal('vc_email')
-                + '\r\nORG:' + getFieldVal('vc_company')
-                + '\r\nURL:' + getFieldVal('vc_website')
-                + '\r\nEND:VCARD';
-        }
-        case 'pdf':
-            return getFieldVal('pdf_url');
-        case 'social':
-            return getFieldVal('social_url');
-        case 'event': {
-            var title = getFieldVal('ev_title');
-            if (!title) return '';
-            var fmtDt = function(dt) { return dt.replace(/[-:T]/g,'').slice(0,15) + 'Z'; };
-            return 'BEGIN:VEVENT\r\nSUMMARY:' + title
-                + '\r\nDTSTART:' + fmtDt(getFieldVal('ev_start') || '20250101T000000')
-                + '\r\nDTEND:'   + fmtDt(getFieldVal('ev_end')   || '20250101T010000')
-                + '\r\nLOCATION:'    + getFieldVal('ev_location')
-                + '\r\nDESCRIPTION:' + getFieldVal('ev_description')
-                + '\r\nEND:VEVENT';
-        }
-        default: return '';
-    }
-}
-
-function updatePreview() {
-    var content = buildContent();
-    var wrap    = document.getElementById('qrCanvas');
-    var btnD    = document.getElementById('btnDownload');
-    var btnS    = document.getElementById('btnDownloadSvg');
-
-    if (!content) {
-        wrap.innerHTML = '<span style="color:#ccc;font-size:13px">Llena los campos<br>para ver el preview</span>';
-        qrInstance     = null;
-        btnD.style.display = 'none';
-        btnS.style.display = 'none';
-        return;
-    }
-
-    wrap.innerHTML = '';
-    wrap.style = 'width:200px;height:200px';
-
-    try {
-        qrInstance = new QRCode(wrap, {
-            text:         content,
-            width:        200,
-            height:       200,
-            colorDark:    '#1a1a2e',
-            colorLight:   '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
-        });
-        btnD.style.display = 'inline-block';
-        btnS.style.display = 'inline-block';
-    } catch(e) {
-        wrap.innerHTML = '<span style="color:#e74c3c;font-size:12px">Contenido demasiado largo</span>';
-    }
-}
-
-function downloadPNG() {
-    var canvas = document.querySelector('#qrCanvas canvas');
-    if (!canvas) { alert('Genera un QR primero'); return; }
-    var link = document.createElement('a');
-    link.download = (document.getElementById('qrName')?.value || 'qr-code') + '.png';
-    link.href     = canvas.toDataURL('image/png');
-    link.click();
-}
-
-function downloadSVG() {
-    var content = buildContent();
-    if (!content) { alert('Genera un QR primero'); return; }
-    // SVG simple via módulos de puntos
-    // Usamos imagen PNG embebida en SVG como fallback
-    var canvas = document.querySelector('#qrCanvas canvas');
-    if (!canvas) { alert('Genera un QR primero'); return; }
-    var dataUrl = canvas.toDataURL('image/png');
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">'
-            + '<image href="' + dataUrl + '" width="200" height="200"/>'
-            + '</svg>';
-    var blob = new Blob([svg], {type:'image/svg+xml'});
-    var url  = URL.createObjectURL(blob);
-    var link = document.createElement('a');
-    link.download = (document.getElementById('qrName')?.value || 'qr-code') + '.svg';
-    link.href     = url;
-    link.click();
-    URL.revokeObjectURL(url);
-}
-
 // Init
 switchType();
 </script>

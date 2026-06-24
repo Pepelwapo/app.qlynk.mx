@@ -306,22 +306,37 @@ $f = fn(string $key): string => htmlspecialchars($fields[$key] ?? '');
 
       <hr class="my-3">
 
-      <div class="text-start" style="font-size:12px;color:#666">
-        <div class="d-flex justify-content-between mb-1">
-          <span class="text-muted">Escaneos:</span>
-          <strong><?php echo number_format((int)$qr['scan_count']); ?></strong>
+      <!-- Stats rápidas -->
+      <div class="d-flex justify-content-around mb-3">
+        <div class="text-center">
+          <div class="fw-bold" style="font-size:22px"><?php echo number_format((int)$qr['scan_count']); ?></div>
+          <div style="font-size:11px;color:#aaa">Escaneos totales</div>
         </div>
-        <div class="d-flex justify-content-between mb-1">
-          <span class="text-muted">Estado:</span>
+        <div class="text-center">
           <span class="badge <?php echo $qr['active'] ? 'bg-success' : 'bg-secondary'; ?>">
             <?php echo $qr['active'] ? 'Activo' : 'Inactivo'; ?>
           </span>
+          <div style="font-size:11px;color:#aaa;margin-top:4px">Estado</div>
         </div>
-        <div class="d-flex justify-content-between">
-          <span class="text-muted">Código:</span>
-          <code><?php echo htmlspecialchars($qr['short_code']); ?></code>
+        <div class="text-center">
+          <code style="font-size:13px"><?php echo htmlspecialchars($qr['short_code']); ?></code>
+          <div style="font-size:11px;color:#aaa;margin-top:4px">Código</div>
         </div>
       </div>
+
+      <?php if (!empty($scanDays)): ?>
+      <!-- Chart de escaneos (últimos 14 días) -->
+      <div class="mt-2">
+        <div style="font-size:11px;color:#aaa;text-align:left;margin-bottom:4px">
+          Escaneos — últimos 14 días
+        </div>
+        <canvas id="scanChart" height="100"></canvas>
+      </div>
+      <?php else: ?>
+      <div style="font-size:11px;color:#ccc;text-align:center;margin-top:8px">
+        <i class="bi bi-bar-chart me-1"></i>Sin datos de escaneo aún
+      </div>
+      <?php endif; ?>
 
     </div>
     </div>
@@ -333,6 +348,54 @@ $f = fn(string $key): string => htmlspecialchars($fields[$key] ?? '');
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<?php if (!empty($scanDays)): ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    var ctx  = document.getElementById('scanChart');
+    if (!ctx) return;
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels:   <?php echo json_encode($scanDays); ?>,
+            datasets: [{
+                label:           'Escaneos',
+                data:            <?php echo json_encode($scanCounts); ?>,
+                backgroundColor: '#1a1a2e',
+                borderRadius:    4,
+                borderSkipped:   false,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: function(items) { return items[0].label; },
+                        label: function(item)  { return item.raw + ' escaneo' + (item.raw !== 1 ? 's' : ''); }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 9 }, maxRotation: 0, color: '#aaa' }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        font: { size: 9 }, color: '#aaa',
+                        callback: function(v) { return Number.isInteger(v) ? v : null; }
+                    },
+                    grid: { color: '#f0f0f0' }
+                }
+            }
+        }
+    });
+})();
+</script>
+<?php endif; ?>
 <script>
 var qrDynamic = null;
 
@@ -361,28 +424,44 @@ function updatePreview() {
     // Solo re-mostramos el tipo correcto
 }
 
+function getHDCanvas() {
+    var src = document.querySelector('#qrGoCode canvas');
+    if (!src) return null;
+    var scale = 6; // 180px → 1080px HD
+    var hd    = document.createElement('canvas');
+    hd.width  = src.width  * scale;
+    hd.height = src.height * scale;
+    var ctx   = hd.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(src, 0, 0, hd.width, hd.height);
+    return hd;
+}
+
 function downloadPNG() {
-    var canvas = document.querySelector('#qrGoCode canvas');
-    if (!canvas) return;
-    var link = document.createElement('a');
+    var hd = getHDCanvas();
+    if (!hd) return;
+    var link      = document.createElement('a');
     link.download = '<?php echo addslashes($qr['name']); ?>-qr.png';
-    link.href     = canvas.toDataURL('image/png');
+    link.href     = hd.toDataURL('image/png');
     link.click();
 }
 
 function downloadSVG() {
-    var canvas = document.querySelector('#qrGoCode canvas');
-    if (!canvas) return;
-    var dataUrl = canvas.toDataURL('image/png');
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">'
-            + '<image href="' + dataUrl + '" width="200" height="200"/></svg>';
-    var blob = new Blob([svg], {type:'image/svg+xml'});
+    var hd = getHDCanvas();
+    if (!hd) return;
+    var dataUrl = hd.toDataURL('image/png');
+    var size    = hd.width;
+    var svg     = '<?xml version="1.0" encoding="UTF-8"?>\n'
+                + '<svg xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size + '">'
+                + '<image href="' + dataUrl + '" width="' + size + '" height="' + size + '"/>'
+                + '</svg>';
+    var blob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});
     var url  = URL.createObjectURL(blob);
     var link = document.createElement('a');
     link.download = '<?php echo addslashes($qr['name']); ?>-qr.svg';
     link.href     = url;
     link.click();
-    URL.revokeObjectURL(url);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
 }
 
 // Init: mostrar solo los campos del tipo actual

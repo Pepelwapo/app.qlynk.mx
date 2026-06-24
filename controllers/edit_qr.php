@@ -69,6 +69,35 @@ if (!empty($_GET['saved'])) {
     $saved = true;
 }
 
+// Estadísticas de escaneo por día (últimos 14 días) para el chart
+$scanDays  = [];
+$scanCounts = [];
+try {
+    $stmtScans = $pdo->prepare("
+        SELECT DATE(scanned_at) AS day, COUNT(*) AS total
+        FROM qr_scans
+        WHERE qr_id = ?
+          AND scanned_at >= DATE_SUB(CURDATE(), INTERVAL 14 DAY)
+        GROUP BY DATE(scanned_at)
+        ORDER BY day ASC
+    ");
+    $stmtScans->execute([$id]);
+    $scanRows = $stmtScans->fetchAll();
+
+    // Rellenar todos los días (con 0 si no hay escaneos)
+    $scanMap = [];
+    foreach ($scanRows as $row) {
+        $scanMap[$row['day']] = (int)$row['total'];
+    }
+    for ($i = 13; $i >= 0; $i--) {
+        $day = date('Y-m-d', strtotime("-{$i} days"));
+        $scanDays[]   = date('d/m', strtotime($day));
+        $scanCounts[] = $scanMap[$day] ?? 0;
+    }
+} catch (Exception $e) {
+    // qr_scans aún no existe — se muestra el panel sin chart
+}
+
 require __DIR__ . '/../views/edit_qr.php';
 
 // ════════════════════════════════════════════════════════════════

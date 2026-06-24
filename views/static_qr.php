@@ -428,23 +428,37 @@ function liveUpdate() {
     }
 }
 
+function getHDCanvas() {
+    var src = document.querySelector('#qrCanvas canvas');
+    if (!src) return null;
+    // Upscale to at least 1080px regardless of the preview size chosen
+    var minPx = 1080;
+    var scale = Math.max(6, Math.ceil(minPx / src.width));
+    var hd    = document.createElement('canvas');
+    hd.width  = src.width  * scale;
+    hd.height = src.height * scale;
+    var ctx   = hd.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(src, 0, 0, hd.width, hd.height);
+    return hd;
+}
+
 function downloadPNG() {
-    var canvas = document.querySelector('#qrCanvas canvas');
-    if (!canvas) { alert('Genera un QR primero'); return; }
-    var link = document.createElement('a');
+    var hd = getHDCanvas();
+    if (!hd) { alert('Genera un QR primero'); return; }
+    var link      = document.createElement('a');
     link.download = 'qlynk-qr-' + currentType + '.png';
-    link.href     = canvas.toDataURL('image/png');
+    link.href     = hd.toDataURL('image/png');
     link.click();
 }
 
 function downloadSVG() {
-    var canvas = document.querySelector('#qrCanvas canvas');
-    if (!canvas) { alert('Genera un QR primero'); return; }
-    var size    = parseInt(document.getElementById('qrSize').value) || 250;
-    var dataUrl = canvas.toDataURL('image/png');
+    var hd = getHDCanvas();
+    if (!hd) { alert('Genera un QR primero'); return; }
+    var dataUrl = hd.toDataURL('image/png');
+    var size    = hd.width;
     var svg     = '<?xml version="1.0" encoding="UTF-8"?>\n'
-                + '<svg xmlns="http://www.w3.org/2000/svg" '
-                + 'width="' + size + '" height="' + size + '">'
+                + '<svg xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size + '">'
                 + '<image href="' + dataUrl + '" width="' + size + '" height="' + size + '"/>'
                 + '</svg>';
     var blob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});

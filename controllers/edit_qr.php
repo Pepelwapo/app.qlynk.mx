@@ -165,7 +165,7 @@ function qr_build_target_url(string $type, array $post): string
             $end   = trim($post['ev_end']         ?? '');
             $loc   = trim($post['ev_location']    ?? '');
             $desc  = trim($post['ev_description'] ?? '');
-            $fmtDt = fn($dt) => str_replace(['-', ':', 'T'], '', $dt) . '00Z';
+            $fmtDt = function($dt) { return str_replace(['-', ':', 'T'], '', $dt) . '00Z'; };
             return "BEGIN:VEVENT\r\nSUMMARY:{$title}"
                 . "\r\nDTSTART:{$fmtDt($start)}"
                 . "\r\nDTEND:{$fmtDt($end)}"

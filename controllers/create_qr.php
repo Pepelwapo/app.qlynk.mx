@@ -43,6 +43,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // ── PDF: subir archivo si fue provisto ──────────────────────────
+    $pdfUploadUrl = '';
+    if ($type === 'pdf' && !empty($_FILES['pdf_file']['name'])) {
+        $file     = $_FILES['pdf_file'];
+        $maxBytes = 800 * 1024; // 800 KB
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $error = 'Error al subir el archivo PDF. Intenta de nuevo.';
+            require __DIR__ . '/../views/create_qr.php';
+            exit;
+        }
+        if ($file['size'] > $maxBytes) {
+            $error = 'El PDF supera el límite de 800 KB. Comprime el archivo e intenta de nuevo.';
+            require __DIR__ . '/../views/create_qr.php';
+            exit;
+        }
+
+        // Verificar tipo MIME
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime  = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        if ($mime !== 'application/pdf') {
+            $error = 'El archivo debe ser un PDF válido.';
+            require __DIR__ . '/../views/create_qr.php';
+            exit;
+        }
+
+        // Límite de archivos PDF por usuario (máximo 10 por usuario)
+        $uploadDir = __DIR__ . '/../../uploads/pdfs/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        $existingFiles = glob($uploadDir . 'u' . (int)$_SESSION['user_id'] . '_*.pdf');
+        if (count($existingFiles) >= 10) {
+            $error = 'Límite de 10 PDFs alcanzado. Elimina alguno antes de subir otro.';
+            require __DIR__ . '/../views/create_qr.php';
+            exit;
+        }
+
+        // Guardar con nombre único
+        $newName = 'u' . (int)$_SESSION['user_id'] . '_' . bin2hex(random_bytes(8)) . '.pdf';
+        $destPath = $uploadDir . $newName;
+        if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+            $error = 'No se pudo guardar el archivo. Contacta soporte.';
+            require __DIR__ . '/../views/create_qr.php';
+            exit;
+        }
+
+        $pdfUploadUrl = APP_APP_URL . '/uploads/pdfs/' . $newName;
+        // Inyectar en $_POST para que qr_build_target_url lo use
+        $_POST['pdf_url'] = $pdfUploadUrl;
+    }
+
     $target_url = qr_build_target_url($type, $_POST);
 
     if (empty($target_url)) {
@@ -58,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$shortCode]);
     } while ($stmt->fetch());
 
-    $expires = trim($_POST['expires_at'] ?? '');
+    $expires   = trim($_POST['expires_at'] ?? '');
     $expiresAt = (!empty($expires)) ? date('Y-m-d H:i:s', strtotime($expires)) : null;
 
     $pdo->prepare("
@@ -83,18 +136,18 @@ require __DIR__ . '/../views/create_qr.php';
 // Helper: construir target_url según tipo de QR
 // ════════════════════════════════════════════════════════════════
 
-function qr_build_target_url(string $type, array $post): string
-{
+function qr_build_target_url($type, $post) {
     switch ($type) {
         case 'url':
             return trim($post['url'] ?? '');
-        case 'whatsapp': {
+
+        case 'whatsapp':
             $phone = preg_replace('/\D/', '', trim($post['wa_phone'] ?? ''));
             $msg   = trim($post['wa_message'] ?? '');
             if (empty($phone)) return '';
             return 'https://wa.me/' . $phone . ($msg ? '?text=' . urlencode($msg) : '');
-        }
-        case 'email': {
+
+        case 'email':
             $em   = trim($post['em_email']   ?? '');
             $subj = trim($post['em_subject'] ?? '');
             $body = trim($post['em_body']    ?? '');
@@ -103,23 +156,25 @@ function qr_build_target_url(string $type, array $post): string
             if ($subj) $q[] = 'subject=' . urlencode($subj);
             if ($body) $q[] = 'body='    . urlencode($body);
             return 'mailto:' . $em . ($q ? '?' . implode('&', $q) : '');
-        }
+
         case 'phone':
-            return ($ph = trim($post['phone_number'] ?? '')) ? 'tel:' . $ph : '';
-        case 'sms': {
+            $ph = trim($post['phone_number'] ?? '');
+            return $ph ? 'tel:' . $ph : '';
+
+        case 'sms':
             $ph  = trim($post['sms_phone']   ?? '');
             $msg = trim($post['sms_message'] ?? '');
             if (empty($ph)) return '';
             return 'sms:' . $ph . ($msg ? '?body=' . urlencode($msg) : '');
-        }
-        case 'wifi': {
+
+        case 'wifi':
             $ssid = trim($post['wifi_ssid']     ?? '');
             $pass = trim($post['wifi_password'] ?? '');
             $sec  = trim($post['wifi_security'] ?? 'WPA');
             if (empty($ssid)) return '';
             return 'WIFI:S:' . $ssid . ';T:' . $sec . ';P:' . $pass . ';;';
-        }
-        case 'vcard': {
+
+        case 'vcard':
             $n = trim($post['vc_name'] ?? '');
             if (empty($n)) return '';
             return "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:{$n}"
@@ -128,26 +183,28 @@ function qr_build_target_url(string $type, array $post): string
                 . "\r\nORG:"   . trim($post['vc_company'] ?? '')
                 . "\r\nURL:"   . trim($post['vc_website'] ?? '')
                 . "\r\nEND:VCARD";
-        }
+
         case 'pdf':
-            return trim($post['pdf_url']    ?? '');
+            return trim($post['pdf_url'] ?? '');
+
         case 'social':
             return trim($post['social_url'] ?? '');
-        case 'event': {
+
+        case 'event':
             $title = trim($post['ev_title'] ?? '');
             if (empty($title)) return '';
             $start = trim($post['ev_start']       ?? '');
             $end   = trim($post['ev_end']         ?? '');
             $loc   = trim($post['ev_location']    ?? '');
             $desc  = trim($post['ev_description'] ?? '');
-            $fmtDt = fn($dt) => str_replace(['-', ':', 'T'], '', $dt) . '00Z';
+            $fmtDt = function($dt) { return str_replace(['-', ':', 'T'], '', $dt) . '00Z'; };
             return "BEGIN:VEVENT\r\nSUMMARY:{$title}"
                 . "\r\nDTSTART:{$fmtDt($start)}"
                 . "\r\nDTEND:{$fmtDt($end)}"
                 . "\r\nLOCATION:{$loc}"
                 . "\r\nDESCRIPTION:{$desc}"
                 . "\r\nEND:VEVENT";
-        }
+
         default:
             return trim($post['url'] ?? '');
     }

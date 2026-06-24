@@ -26,6 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $name  = trim($_POST['name']        ?? '');
                 $desc  = trim($_POST['description'] ?? '');
                 $slug  = trim($_POST['slug']        ?? '');
+                $validTpl  = ['classic', 'dark', 'cards'];
+                $template  = in_array(trim($_POST['template'] ?? ''), $validTpl) ? trim($_POST['template']) : 'classic';
+                $waEnabled = !empty($_POST['whatsapp_enabled']) ? 1 : 0;
+                $waPhone   = trim($_POST['whatsapp_phone'] ?? '');
                 if (empty($name) || empty($slug)) {
                     $error = 'Nombre y slug son obligatorios.';
                 } elseif (!preg_match('/^[a-z0-9\-]+$/', $slug)) {
@@ -36,8 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($chk->fetch()) {
                         $error = 'Ese slug ya está en uso.';
                     } else {
-                        $pdo->prepare("UPDATE catalogs SET name=?,description=?,slug=? WHERE id=? AND user_id=?")
-                            ->execute([$name, $desc, $slug, $id, $_SESSION['user_id']]);
+                        $pdo->prepare("UPDATE catalogs SET name=?,description=?,slug=?,template=?,whatsapp_enabled=?,whatsapp_phone=? WHERE id=? AND user_id=?")
+                            ->execute([$name, $desc, $slug, $template, $waEnabled, $waPhone, $id, $_SESSION['user_id']]);
                         $success = 'Catálogo actualizado.';
                         $stmt = $pdo->prepare("SELECT * FROM catalogs WHERE id = ? LIMIT 1");
                         $stmt->execute([$id]);

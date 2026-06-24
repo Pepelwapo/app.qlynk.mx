@@ -665,7 +665,7 @@ function downloadSVG() {
     if (!hd) { alert('Genera un QR primero'); return; }
     var dataUrl = hd.toDataURL('image/png');
     var size    = hd.width;
-    var svg     = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    var svg     = '<' + '?xml version="1.0" encoding="UTF-8"?>\n'
                 + '<svg xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size + '">'
                 + '<image href="' + dataUrl + '" width="' + size + '" height="' + size + '"/>'
                 + '</svg>';

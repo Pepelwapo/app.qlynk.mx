@@ -13,6 +13,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $desc  = trim($_POST['description'] ?? '');
         $slug  = trim($_POST['slug'] ?? '');
 
+        $validTpl  = ['classic', 'dark', 'cards'];
+        $template  = in_array(trim($_POST['template'] ?? ''), $validTpl) ? trim($_POST['template']) : 'classic';
+        $waEnabled = !empty($_POST['whatsapp_enabled']) ? 1 : 0;
+        $waPhone   = trim($_POST['whatsapp_phone'] ?? '');
+
         if (empty($name)) {
             $error = 'El nombre del catálogo es obligatorio.';
         } elseif (empty($slug)) {
@@ -26,9 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Ese slug ya está en uso. Elige uno diferente.';
             } else {
                 $pdo->prepare("
-                    INSERT INTO catalogs (user_id, name, description, slug, active, created_at)
-                    VALUES (?, ?, ?, ?, 1, NOW())
-                ")->execute([$_SESSION['user_id'], $name, $desc, $slug]);
+                    INSERT INTO catalogs
+                        (user_id, name, description, slug, template, whatsapp_enabled, whatsapp_phone, active, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW())
+                ")->execute([$_SESSION['user_id'], $name, $desc, $slug, $template, $waEnabled, $waPhone]);
 
                 $newId = $pdo->lastInsertId();
                 header('Location: /catalogs/edit?id=' . $newId . '&created=1');

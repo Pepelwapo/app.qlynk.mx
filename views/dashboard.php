@@ -9,7 +9,11 @@ $pctQr    = $user['qr_dynamic_limit'] > 0
 $pctScans = $user['scans_limit'] > 0
     ? min(100, round($totalScans / $user['scans_limit'] * 100))
     : 0;
-$pctTrial = min(100, round((14 - $trialDaysLeft) / 14 * 100));
+
+// Trial %: usa duración real desde DB — sin hardcodeo
+$pctTrial = ($totalTrialDays > 0)
+    ? min(100, round(($totalTrialDays - $trialDaysLeft) / $totalTrialDays * 100))
+    : 0;
 
 // Color barra según uso
 function barColor(int $pct): string {
@@ -23,12 +27,12 @@ function barColor(int $pct): string {
 <?php require __DIR__ . '/partials/sidebar.php'; ?>
 <main class="flex-grow-1 p-4" style="background:var(--bs-light,#f8f9fa);min-height:100vh">
 
-  <?php if ($trialDaysLeft <= 7): ?>
+  <?php if ($trialDaysLeft > 0 && $trialDaysLeft <= 7): ?>
   <div class="alert d-flex justify-content-between align-items-center py-2"
        style="background:#fff8e1;border:1px solid #FAC775;color:#854F0B">
     <span>
       <i class="bi bi-clock me-1"></i>
-      <strong>Tu trial termina en <?php echo $trialDaysLeft; ?> días.</strong>
+      <strong>Tu trial termina en <?php echo $trialDaysLeft; ?> día<?php echo $trialDaysLeft !== 1 ? 's' : ''; ?>.</strong>
       No pierdas tus QR ni tus escaneos.
     </span>
     <a href="/billing" class="btn btn-sm btn-warning text-dark">Upgrade</a>

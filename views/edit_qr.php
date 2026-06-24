@@ -17,7 +17,7 @@ $labels = [
     'social'   => '📱 Red Social',
     'event'    => '📅 Evento',
 ];
-$f = fn(string $key): string => htmlspecialchars($fields[$key] ?? '');
+$f = function($key) use ($fields) { return htmlspecialchars($fields[$key] ?? ''); };
 ?>
 <div class="d-flex">
 <?php require __DIR__ . '/partials/sidebar.php'; ?>
@@ -465,7 +465,7 @@ function downloadSVG() {
     if (!hd) return;
     var dataUrl = hd.toDataURL('image/png');
     var size    = hd.width;
-    var svg     = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    var svg     = '<' + '?xml version="1.0" encoding="UTF-8"?>\n'
                 + '<svg xmlns="http://www.w3.org/2000/svg" width="' + size + '" height="' + size + '">'
                 + '<image href="' + dataUrl + '" width="' + size + '" height="' + size + '"/>'
                 + '</svg>';

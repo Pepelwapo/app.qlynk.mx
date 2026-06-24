@@ -26,8 +26,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'save_meta':
                 $name  = trim($_POST['name']        ?? '');
                 $desc  = trim($_POST['description'] ?? '');
-                $color = trim($_POST['color']       ?? '#1a1a2e');
+                $color = trim($_POST['color']       ?? '#e74c3c');
                 $slug  = trim($_POST['slug']        ?? '');
+                $validTpl  = ['classic', 'dark', 'cards'];
+                $template  = in_array(trim($_POST['template'] ?? ''), $validTpl) ? trim($_POST['template']) : 'classic';
+                $waEnabled = !empty($_POST['whatsapp_enabled']) ? 1 : 0;
+                $waPhone   = trim($_POST['whatsapp_phone'] ?? '');
                 if (empty($name) || empty($slug)) {
                     $error = 'Nombre y slug son obligatorios.';
                 } elseif (!preg_match('/^[a-z0-9\-]+$/', $slug)) {
@@ -38,8 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($chk->fetch()) {
                         $error = 'Ese slug ya está en uso.';
                     } else {
-                        $pdo->prepare("UPDATE menus SET name=?,description=?,slug=?,color=? WHERE id=? AND user_id=?")
-                            ->execute([$name, $desc, $slug, $color, $id, $_SESSION['user_id']]);
+                        $pdo->prepare("UPDATE menus SET name=?,description=?,slug=?,color=?,template=?,whatsapp_enabled=?,whatsapp_phone=? WHERE id=? AND user_id=?")
+                            ->execute([$name, $desc, $slug, $color, $template, $waEnabled, $waPhone, $id, $_SESSION['user_id']]);
                         $success = 'Menú actualizado.';
                         // Refresh menu data
                         $stmt = $pdo->prepare("SELECT * FROM menus WHERE id = ? LIMIT 1");

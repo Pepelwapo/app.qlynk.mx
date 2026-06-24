@@ -11,8 +11,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $name  = trim($_POST['name'] ?? '');
         $desc  = trim($_POST['description'] ?? '');
-        $color = trim($_POST['color'] ?? '#1a1a2e');
+        $color = trim($_POST['color'] ?? '#e74c3c');
         $slug  = trim($_POST['slug'] ?? '');
+
+        $validTpl  = ['classic', 'dark', 'cards'];
+        $template  = in_array(trim($_POST['template'] ?? ''), $validTpl) ? trim($_POST['template']) : 'classic';
+        $waEnabled = !empty($_POST['whatsapp_enabled']) ? 1 : 0;
+        $waPhone   = trim($_POST['whatsapp_phone'] ?? '');
 
         if (empty($name)) {
             $error = 'El nombre del menú es obligatorio.';
@@ -28,9 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Ese slug ya está en uso. Elige uno diferente.';
             } else {
                 $pdo->prepare("
-                    INSERT INTO menus (user_id, name, description, slug, color, active, created_at)
-                    VALUES (?, ?, ?, ?, ?, 1, NOW())
-                ")->execute([$_SESSION['user_id'], $name, $desc, $slug, $color]);
+                    INSERT INTO menus
+                        (user_id, name, description, slug, color, template, whatsapp_enabled, whatsapp_phone, active, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())
+                ")->execute([$_SESSION['user_id'], $name, $desc, $slug, $color, $template, $waEnabled, $waPhone]);
 
                 $newId = $pdo->lastInsertId();
                 header('Location: /menus/edit?id=' . $newId . '&created=1');

@@ -56,6 +56,42 @@ require __DIR__ . '/partials/head.php';
             <label class="form-label fw-semibold" style="font-size:13px">Descripción</label>
             <textarea name="description" class="form-control form-control-sm" style="border-radius:8px" rows="2"><?= htmlspecialchars($catalog['description'] ?? '') ?></textarea>
           </div>
+
+          <!-- Template selector -->
+          <input type="hidden" name="template" id="tplEdit" value="<?= htmlspecialchars($catalog['template'] ?? 'classic') ?>">
+          <div class="mb-3">
+            <label class="form-label fw-semibold" style="font-size:13px">Plantilla visual</label>
+            <div class="d-flex gap-2">
+              <?php
+              $tpls   = ['classic' => 'Clásico', 'dark' => 'Elegante', 'cards' => 'Tarjetas'];
+              $curTpl = $catalog['template'] ?? 'classic';
+              foreach ($tpls as $tkey => $tlabel): ?>
+              <div class="flex-fill text-center p-2 rounded border tpl-btn-edit <?= $curTpl === $tkey ? 'border-dark bg-dark text-white' : 'border-secondary-subtle' ?>"
+                   style="font-size:12px;font-weight:600;cursor:pointer"
+                   onclick="pickTplEdit('<?= $tkey ?>', this)">
+                <?= $tlabel ?>
+              </div>
+              <?php endforeach; ?>
+            </div>
+          </div>
+
+          <!-- WhatsApp -->
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="waEditToggle" name="whatsapp_enabled"
+                     value="1" onchange="toggleWAEdit(this.checked)"
+                     <?= !empty($catalog['whatsapp_enabled']) ? 'checked' : '' ?>>
+              <label class="form-check-label fw-semibold" for="waEditToggle" style="font-size:13px">
+                WhatsApp activo
+              </label>
+            </div>
+            <div id="waEditFields" style="display:<?= !empty($catalog['whatsapp_enabled']) ? 'block' : 'none' ?>;margin-top:8px">
+              <input name="whatsapp_phone" class="form-control form-control-sm" style="border-radius:8px"
+                     placeholder="+521234567890"
+                     value="<?= htmlspecialchars($catalog['whatsapp_phone'] ?? '') ?>">
+            </div>
+          </div>
+
           <button type="submit" class="btn btn-dark btn-sm fw-semibold w-100" style="border-radius:8px">
             <i class="bi bi-save me-1"></i>Guardar cambios
           </button>
@@ -198,4 +234,18 @@ require __DIR__ . '/partials/head.php';
   </div>
 </main>
 </div>
+<script>
+function pickTplEdit(tpl, el) {
+    document.getElementById('tplEdit').value = tpl;
+    document.querySelectorAll('.tpl-btn-edit').forEach(function(b) {
+        b.classList.remove('border-dark','bg-dark','text-white');
+        b.classList.add('border-secondary-subtle');
+    });
+    el.classList.add('border-dark','bg-dark','text-white');
+    el.classList.remove('border-secondary-subtle');
+}
+function toggleWAEdit(on) {
+    document.getElementById('waEditFields').style.display = on ? 'block' : 'none';
+}
+</script>
 <?php require __DIR__ . '/partials/footer.php'; ?>

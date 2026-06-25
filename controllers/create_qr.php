@@ -114,17 +114,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $expires   = trim($_POST['expires_at'] ?? '');
     $expiresAt = (!empty($expires)) ? date('Y-m-d H:i:s', strtotime($expires)) : null;
 
-    $pdo->prepare("
-        INSERT INTO qr_codes (user_id, name, short_code, target_url, type, expires_at)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ")->execute([
-        $_SESSION['user_id'],
-        $name,
-        $shortCode,
-        $target_url,
-        $type,
-        $expiresAt
-    ]);
+    // Colors — validated hex (#RRGGBB), fallback to black/white
+    $darkColor  = preg_match('/^#[0-9a-fA-F]{6}$/', trim($_POST['dark_color']  ?? '')) ? strtoupper(trim($_POST['dark_color']))  : '#000000';
+    $lightColor = preg_match('/^#[0-9a-fA-F]{6}$/', trim($_POST['light_color'] ?? '')) ? strtoupper(trim($_POST['light_color'])) : '#FFFFFF';
+
+    try {
+        $pdo->prepare("
+            INSERT INTO qr_codes (user_id, name, short_code, target_url, type, dark_color, light_color, expires_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ")->execute([
+            $_SESSION['user_id'],
+            $name,
+            $shortCode,
+            $target_url,
+            $type,
+            $darkColor,
+            $lightColor,
+            $expiresAt
+        ]);
+    } catch (Exception $e) {
+        // Fallback: columns may not exist yet — insert without colors
+        $pdo->prepare("
+            INSERT INTO qr_codes (user_id, name, short_code, target_url, type, expires_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ")->execute([
+            $_SESSION['user_id'],
+            $name,
+            $shortCode,
+            $target_url,
+            $type,
+            $expiresAt
+        ]);
+    }
 
     header('Location: /qrs?created=1');
     exit;

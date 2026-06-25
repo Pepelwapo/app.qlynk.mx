@@ -190,6 +190,10 @@ require __DIR__ . '/partials/head.php';
               <label class="form-label" style="font-size:11px;font-weight:600;color:#888;margin-bottom:3px">PRECIO</label>
               <input type="number" name="item_price" class="form-control form-control-sm" style="border-radius:8px" placeholder="0.00" step="0.01" min="0">
             </div>
+            <div class="col-12">
+              <label class="form-label" style="font-size:11px;font-weight:600;color:#888;margin-bottom:3px">URL DE IMAGEN <span style="font-weight:400;color:#aaa">(opcional — pega desde tu <a href="/media" target="_blank">Biblioteca</a>)</span></label>
+              <input type="url" name="item_image_url" class="form-control form-control-sm" style="border-radius:8px" placeholder="https://app.qlynk.mx/uploads/images/...">
+            </div>
             <div class="col-md-2">
               <button type="submit" class="btn btn-dark btn-sm w-100" style="border-radius:8px">
                 <i class="bi bi-plus-lg"></i> Agregar

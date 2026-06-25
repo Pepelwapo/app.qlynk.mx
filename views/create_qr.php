@@ -23,9 +23,28 @@ require __DIR__ . '/partials/head.php';
 .ql-label { font-size:13px;font-weight:600;margin-bottom:4px;display:block;color:#374151; }
 .ql-hint  { font-size:11px;color:#9ca3af;margin-top:3px; }
 
-/* ── Panel info ── */
-.info-row { display:flex;align-items:flex-start;gap:10px;margin-bottom:14px; }
-.info-row .ico { font-size:20px;min-width:24px;margin-top:1px; }
+/* ── Color picker ── */
+.color-palette { display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:16px; }
+.color-swatch  {
+    width:32px;height:32px;border-radius:8px;cursor:pointer;border:2px solid transparent;
+    transition:.15s;position:relative;overflow:hidden;
+}
+.color-swatch:hover { transform:scale(1.1); }
+.color-swatch.selected { border-color:#1a1a2e;box-shadow:0 0 0 2px #fff,0 0 0 4px #1a1a2e; }
+
+.rgb-row { display:flex;gap:6px;margin-top:6px; }
+.rgb-row input { width:100%;font-size:12px;text-align:center;padding:4px;border:1px solid #e5e7eb;border-radius:6px; }
+.rgb-row label { font-size:10px;color:#999;text-align:center;display:block;margin-top:2px; }
+
+/* ── Preview QR ── */
+#qrPreviewWrap {
+    display:flex;align-items:center;justify-content:center;
+    width:180px;height:180px;margin:0 auto 16px;
+    background:#fff;border-radius:12px;
+    box-shadow:0 4px 20px rgba(0,0,0,.08);
+    overflow:hidden;
+}
+#qrPreviewWrap canvas, #qrPreviewWrap img { max-width:100%;max-height:100%; }
 </style>
 
 <div class="d-flex">
@@ -41,7 +60,7 @@ require __DIR__ . '/partials/head.php';
   </div>
 
   <?php if (!empty($error)): ?>
-  <div class="alert alert-warning d-flex align-items-center gap-2" style="border-radius:12px;max-width:900px">
+  <div class="alert alert-warning d-flex align-items-center gap-2" style="border-radius:12px;max-width:960px">
     <i class="bi bi-exclamation-triangle-fill text-warning"></i>
     <div>
       <?php echo htmlspecialchars($error); ?>
@@ -52,9 +71,9 @@ require __DIR__ . '/partials/head.php';
   </div>
   <?php endif; ?>
 
-  <div class="row g-4" style="max-width:960px">
+  <div class="row g-4" style="max-width:980px">
 
-    <!-- ── Formulario ── -->
+    <!-- ══════════════════ FORMULARIO ══════════════════ -->
     <div class="col-md-7">
     <div class="card border-0 shadow-sm" style="border-radius:16px">
     <div class="card-body p-4">
@@ -66,6 +85,9 @@ require __DIR__ . '/partials/head.php';
 
       <form method="POST" id="createForm" enctype="multipart/form-data">
         <input type="hidden" name="<?php echo CSRF_TOKEN_NAME; ?>" value="<?php echo csrf_token(); ?>">
+        <!-- Color: sincronizados desde el panel derecho -->
+        <input type="hidden" name="dark_color"  id="fDark"  value="<?php echo htmlspecialchars($_POST['dark_color']  ?? '#000000'); ?>">
+        <input type="hidden" name="light_color" id="fLight" value="<?php echo htmlspecialchars($_POST['light_color'] ?? '#FFFFFF'); ?>">
 
         <!-- Nombre -->
         <div class="mb-4">
@@ -76,7 +98,7 @@ require __DIR__ . '/partials/head.php';
                  required>
         </div>
 
-        <!-- Selector de tipo (grid de íconos) -->
+        <!-- Selector de tipo -->
         <div class="mb-1">
           <label class="ql-label">Tipo de contenido</label>
         </div>
@@ -98,7 +120,8 @@ require __DIR__ . '/partials/head.php';
               ['event',    '📅', 'Evento'],
           ];
           $selType = $_POST['type'] ?? 'url';
-          foreach ($types as [$val, $ico, $lbl]):
+          foreach ($types as $t):
+              $val = $t[0]; $ico = $t[1]; $lbl = $t[2];
           ?>
           <button type="button"
                   class="qr-type-btn <?php echo $selType === $val ? 'active' : ''; ?>"
@@ -115,7 +138,7 @@ require __DIR__ . '/partials/head.php';
         <div id="fields-url" class="qr-fields <?php echo ($selType === 'url') ? 'active' : ''; ?>">
           <div class="mb-3">
             <label class="ql-label">URL destino</label>
-            <input name="url" class="form-control" style="border-radius:10px"
+            <input name="url" id="mainUrl" class="form-control" style="border-radius:10px"
                    placeholder="https://tudominio.com"
                    value="<?php echo htmlspecialchars($_POST['url'] ?? ''); ?>">
             <span class="ql-hint">Puede ser cualquier URL: sitio, landing page, tienda…</span>
@@ -131,14 +154,12 @@ require __DIR__ . '/partials/head.php';
               <input name="wa_phone" class="form-control" placeholder="+521234567890"
                      value="<?php echo htmlspecialchars($_POST['wa_phone'] ?? ''); ?>">
             </div>
-            <span class="ql-hint">Incluye + y el código de país. Ej: +521234567890 (México)</span>
           </div>
           <div class="mb-3">
             <label class="ql-label">Mensaje predefinido <small class="fw-normal text-muted">(opcional)</small></label>
             <textarea name="wa_message" class="form-control" rows="3"
                       placeholder="Hola, me interesa saber más… 🎉"
                       style="border-radius:10px"><?php echo htmlspecialchars($_POST['wa_message'] ?? ''); ?></textarea>
-            <span class="ql-hint">El cliente verá este mensaje pre-llenado al abrir WhatsApp.</span>
           </div>
         </div>
 
@@ -173,7 +194,6 @@ require __DIR__ . '/partials/head.php';
               <input name="phone_number" class="form-control" placeholder="+521234567890"
                      value="<?php echo htmlspecialchars($_POST['phone_number'] ?? ''); ?>">
             </div>
-            <span class="ql-hint">Al escanear, el teléfono del cliente abrirá la marcadora con este número.</span>
           </div>
         </div>
 
@@ -258,7 +278,6 @@ require __DIR__ . '/partials/head.php';
                    placeholder="https://..."
                    value="<?php echo htmlspecialchars($_POST['vc_website'] ?? ''); ?>">
           </div>
-          <div class="ql-hint mb-3">Al escanear, el contacto se puede guardar directamente en el teléfono.</div>
         </div>
 
         <!-- PDF -->
@@ -267,17 +286,16 @@ require __DIR__ . '/partials/head.php';
             <label class="ql-label">Subir PDF</label>
             <input name="pdf_file" type="file" accept=".pdf"
                    class="form-control" style="border-radius:10px">
-            <span class="ql-hint">Máximo 800 KB. El archivo se aloja en nuestro servidor.</span>
+            <span class="ql-hint">Máximo 800 KB.</span>
           </div>
           <div class="mb-3">
             <div class="d-flex align-items-center gap-2 text-muted mb-1" style="font-size:12px">
               <hr style="flex:1"><span>o usa una URL</span><hr style="flex:1">
             </div>
-            <label class="ql-label">URL del PDF (si ya tienes alojamiento)</label>
+            <label class="ql-label">URL del PDF</label>
             <input name="pdf_url" class="form-control" style="border-radius:10px"
                    placeholder="https://drive.google.com/file/..."
                    value="<?php echo htmlspecialchars($_POST['pdf_url'] ?? ''); ?>">
-            <span class="ql-hint">Google Drive, Dropbox, tu propio servidor, etc.</span>
           </div>
         </div>
 
@@ -324,10 +342,9 @@ require __DIR__ . '/partials/head.php';
                       placeholder="Breve descripción del evento…"
                       style="border-radius:10px"><?php echo htmlspecialchars($_POST['ev_description'] ?? ''); ?></textarea>
           </div>
-          <span class="ql-hint">Al escanear, el evento se puede agregar al calendario del teléfono.</span>
         </div>
 
-        <!-- Expiración (avanzado) -->
+        <!-- Opciones avanzadas -->
         <hr class="my-4">
         <details>
           <summary class="fw-semibold" style="font-size:13px;cursor:pointer;color:#555">
@@ -352,45 +369,72 @@ require __DIR__ . '/partials/head.php';
     </div>
     </div>
 
-    <!-- ── Panel derecho ── -->
+    <!-- ══════════════════ PANEL DERECHO: COLOR + PREVIEW ══════════════════ -->
     <div class="col-md-5">
     <div class="card border-0 shadow-sm" style="border-radius:16px;position:sticky;top:20px">
     <div class="card-body p-4">
 
-      <div style="font-size:40px;text-align:center;margin-bottom:8px" id="typeIco">🌐</div>
-      <h6 class="fw-bold mb-1 text-center" id="typeTitle">URL / Sitio web</h6>
-      <p class="text-muted text-center mb-4" style="font-size:12px;line-height:1.5" id="typeDesc">
-        Redirige a cualquier sitio web o landing page.
+      <h6 class="fw-bold mb-3 text-center">Vista previa del QR</h6>
+
+      <!-- Preview canvas -->
+      <div id="qrPreviewWrap">
+        <div id="qrPreviewBox"></div>
+      </div>
+
+      <p class="text-center text-muted mb-3" style="font-size:11px">
+        Vista previa aproximada · el código final se genera al crear el QR
       </p>
 
-      <hr class="my-3">
+      <hr class="mb-3">
 
-      <div class="info-row">
-        <span class="ico">🔗</span>
-        <div>
-          <div class="fw-semibold" style="font-size:13px">Código fijo, destino flexible</div>
-          <div class="text-muted" style="font-size:12px">El QR nunca cambia — solo cambia adónde lleva.</div>
-        </div>
-      </div>
-      <div class="info-row">
-        <span class="ico">✏️</span>
-        <div>
-          <div class="fw-semibold" style="font-size:13px">Editable en cualquier momento</div>
-          <div class="text-muted" style="font-size:12px">Sin reimprimir. Actualiza el destino desde tu panel.</div>
-        </div>
-      </div>
-      <div class="info-row">
-        <span class="ico">📊</span>
-        <div>
-          <div class="fw-semibold" style="font-size:13px">Estadísticas de escaneo</div>
-          <div class="text-muted" style="font-size:12px">Registra cuántas veces y cuándo se escanea.</div>
+      <!-- Paleta de colores -->
+      <div class="mb-3">
+        <div class="ql-label mb-2">Esquemas de color</div>
+        <div class="color-palette" id="palette">
+          <!-- Generado por JS -->
         </div>
       </div>
 
-      <hr class="my-3">
+      <!-- Color módulos (oscuro) -->
+      <div class="mb-3">
+        <label class="ql-label">Color de módulos (oscuro)</label>
+        <div class="d-flex align-items-center gap-2">
+          <input type="color" id="darkPicker" value="#000000"
+                 style="width:42px;height:38px;padding:2px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer"
+                 oninput="onDarkColor(this.value)">
+          <input type="text"  id="darkHex"    value="#000000" maxlength="7"
+                 class="form-control" style="border-radius:8px;font-size:13px;font-family:monospace"
+                 oninput="onDarkHexInput(this.value)">
+        </div>
+        <div class="rgb-row">
+          <div><input type="number" id="dR" min="0" max="255" value="0"   oninput="rgbToHex('dark')"><label>R</label></div>
+          <div><input type="number" id="dG" min="0" max="255" value="0"   oninput="rgbToHex('dark')"><label>G</label></div>
+          <div><input type="number" id="dB" min="0" max="255" value="0"   oninput="rgbToHex('dark')"><label>B</label></div>
+        </div>
+      </div>
+
+      <!-- Color fondo (claro) -->
+      <div class="mb-3">
+        <label class="ql-label">Color de fondo (claro)</label>
+        <div class="d-flex align-items-center gap-2">
+          <input type="color" id="lightPicker" value="#FFFFFF"
+                 style="width:42px;height:38px;padding:2px;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer"
+                 oninput="onLightColor(this.value)">
+          <input type="text"  id="lightHex"    value="#FFFFFF" maxlength="7"
+                 class="form-control" style="border-radius:8px;font-size:13px;font-family:monospace"
+                 oninput="onLightHexInput(this.value)">
+        </div>
+        <div class="rgb-row">
+          <div><input type="number" id="lR" min="0" max="255" value="255" oninput="rgbToHex('light')"><label>R</label></div>
+          <div><input type="number" id="lG" min="0" max="255" value="255" oninput="rgbToHex('light')"><label>G</label></div>
+          <div><input type="number" id="lB" min="0" max="255" value="255" oninput="rgbToHex('light')"><label>B</label></div>
+        </div>
+      </div>
+
+      <hr class="mb-3">
       <div class="text-muted text-center" style="font-size:11px">
-        <i class="bi bi-info-circle me-1"></i>
-        El QR final aparece al crearlo. Descargas en PNG y SVG HD disponibles.
+        <i class="bi bi-check-circle me-1 text-success"></i>
+        Los colores quedan guardados y disponibles al editar el QR.
       </div>
 
     </div>
@@ -402,7 +446,12 @@ require __DIR__ . '/partials/head.php';
 </main>
 </div>
 
+<!-- QRCode.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
+/* ═══════════════════════════════════════════════════════
+   Tipo de QR
+═══════════════════════════════════════════════════════ */
 var typeData = {
     'url':      { ico:'🌐', title:'URL / Sitio web',    desc:'Redirige a cualquier sitio web, tienda o landing page.' },
     'whatsapp': { ico:'💬', title:'WhatsApp',            desc:'Abre WhatsApp con un número y mensaje predefinido.' },
@@ -417,23 +466,187 @@ var typeData = {
 };
 
 function selectType(type, btn) {
-    // Actualizar input oculto
     document.getElementById('typeInput').value = type;
-
-    // Marcar botón activo
     document.querySelectorAll('.qr-type-btn').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
-
-    // Mostrar campos correctos
     document.querySelectorAll('.qr-fields').forEach(function(el) { el.classList.remove('active'); });
     var sec = document.getElementById('fields-' + type);
     if (sec) sec.classList.add('active');
-
-    // Actualizar panel derecho
-    var d = typeData[type] || {};
-    document.getElementById('typeIco').textContent   = d.ico   || '⚡';
-    document.getElementById('typeTitle').textContent = d.title || type;
-    document.getElementById('typeDesc').textContent  = d.desc  || '';
+    renderPreview();
 }
+
+/* ═══════════════════════════════════════════════════════
+   Color Picker
+═══════════════════════════════════════════════════════ */
+var PALETTES = [
+    { d:'#000000', l:'#FFFFFF' },
+    { d:'#1a1a2e', l:'#FFFFFF' },
+    { d:'#0f3460', l:'#eef2ff' },
+    { d:'#7c3aed', l:'#f5f3ff' },
+    { d:'#dc2626', l:'#fef2f2' },
+    { d:'#059669', l:'#ecfdf5' },
+    { d:'#d97706', l:'#fffbeb' },
+    { d:'#0e7490', l:'#ecfeff' },
+    { d:'#be185d', l:'#fdf2f8' },
+    { d:'#1d4ed8', l:'#eff6ff' },
+    { d:'#374151', l:'#f9fafb' },
+    { d:'#064e3b', l:'#d1fae5' },
+    { d:'#312e81', l:'#e0e7ff' },
+    { d:'#78350f', l:'#fef3c7' },
+    { d:'#831843', l:'#fce7f3' },
+    { d:'#134e4a', l:'#ccfbf1' },
+];
+
+function buildPalette() {
+    var wrap = document.getElementById('palette');
+    wrap.innerHTML = '';
+    for (var i = 0; i < PALETTES.length; i++) {
+        (function(p) {
+            var sw = document.createElement('div');
+            sw.className  = 'color-swatch';
+            sw.title      = p.d + ' / ' + p.l;
+            // Two-tone preview
+            sw.style.background = 'linear-gradient(135deg, ' + p.d + ' 50%, ' + p.l + ' 50%)';
+            sw.style.border     = '2px solid #e5e7eb';
+            sw.addEventListener('click', function() {
+                applyColors(p.d, p.l);
+                document.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('selected'); });
+                sw.classList.add('selected');
+            });
+            wrap.appendChild(sw);
+        })(PALETTES[i]);
+    }
+    // Mark first as selected
+    wrap.firstChild && wrap.firstChild.classList.add('selected');
+}
+
+function applyColors(dark, light) {
+    dark  = dark  || '#000000';
+    light = light || '#FFFFFF';
+
+    document.getElementById('darkPicker').value  = dark;
+    document.getElementById('darkHex').value     = dark;
+    document.getElementById('lightPicker').value = light;
+    document.getElementById('lightHex').value    = light;
+
+    var dr = hexToRgb(dark);
+    document.getElementById('dR').value = dr.r;
+    document.getElementById('dG').value = dr.g;
+    document.getElementById('dB').value = dr.b;
+
+    var lr = hexToRgb(light);
+    document.getElementById('lR').value = lr.r;
+    document.getElementById('lG').value = lr.g;
+    document.getElementById('lB').value = lr.b;
+
+    // Sync hidden form inputs
+    document.getElementById('fDark').value  = dark;
+    document.getElementById('fLight').value = light;
+
+    renderPreview();
+}
+
+function onDarkColor(val) {
+    document.getElementById('darkHex').value = val;
+    var rgb = hexToRgb(val);
+    document.getElementById('dR').value = rgb.r;
+    document.getElementById('dG').value = rgb.g;
+    document.getElementById('dB').value = rgb.b;
+    document.getElementById('fDark').value = val;
+    renderPreview();
+}
+function onLightColor(val) {
+    document.getElementById('lightHex').value = val;
+    var rgb = hexToRgb(val);
+    document.getElementById('lR').value = rgb.r;
+    document.getElementById('lG').value = rgb.g;
+    document.getElementById('lB').value = rgb.b;
+    document.getElementById('fLight').value = val;
+    renderPreview();
+}
+
+function onDarkHexInput(v) {
+    if (!/^#[0-9a-fA-F]{6}$/.test(v)) return;
+    document.getElementById('darkPicker').value = v;
+    onDarkColor(v);
+}
+function onLightHexInput(v) {
+    if (!/^#[0-9a-fA-F]{6}$/.test(v)) return;
+    document.getElementById('lightPicker').value = v;
+    onLightColor(v);
+}
+
+function rgbToHex(which) {
+    var r = parseInt(document.getElementById(which === 'dark' ? 'dR' : 'lR').value) || 0;
+    var g = parseInt(document.getElementById(which === 'dark' ? 'dG' : 'lG').value) || 0;
+    var b = parseInt(document.getElementById(which === 'dark' ? 'dB' : 'lB').value) || 0;
+    r = Math.min(255, Math.max(0, r));
+    g = Math.min(255, Math.max(0, g));
+    b = Math.min(255, Math.max(0, b));
+    var hex = '#' + ('0'+r.toString(16)).slice(-2)
+                  + ('0'+g.toString(16)).slice(-2)
+                  + ('0'+b.toString(16)).slice(-2);
+    if (which === 'dark') {
+        document.getElementById('darkPicker').value = hex;
+        document.getElementById('darkHex').value    = hex;
+        document.getElementById('fDark').value      = hex;
+    } else {
+        document.getElementById('lightPicker').value = hex;
+        document.getElementById('lightHex').value    = hex;
+        document.getElementById('fLight').value      = hex;
+    }
+    renderPreview();
+}
+
+function hexToRgb(hex) {
+    hex = (hex || '#000000').replace('#','');
+    return {
+        r: parseInt(hex.substring(0,2),16),
+        g: parseInt(hex.substring(2,4),16),
+        b: parseInt(hex.substring(4,6),16)
+    };
+}
+
+/* ═══════════════════════════════════════════════════════
+   QR Preview
+═══════════════════════════════════════════════════════ */
+var _qrObj = null;
+var _renderTimer = null;
+
+function renderPreview() {
+    clearTimeout(_renderTimer);
+    _renderTimer = setTimeout(function() { _doRender(); }, 80);
+}
+
+function _doRender() {
+    var dark  = document.getElementById('fDark').value  || '#000000';
+    var light = document.getElementById('fLight').value || '#FFFFFF';
+    var text  = 'https://go.qlynk.mx/XXXXXX'; // placeholder de densidad real
+
+    var box = document.getElementById('qrPreviewBox');
+    box.innerHTML = '';
+
+    try {
+        _qrObj = new QRCode(box, {
+            text:            text,
+            width:           168,
+            height:          168,
+            colorDark:       dark,
+            colorLight:      light,
+            correctLevel:    QRCode.CorrectLevel.M
+        });
+    } catch(e) { /* ignore */ }
+}
+
+/* ═══════════════════════════════════════════════════════
+   Init
+═══════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
+    buildPalette();
+    applyColors(
+        document.getElementById('fDark').value  || '#000000',
+        document.getElementById('fLight').value || '#FFFFFF'
+    );
+});
 </script>
 <?php require __DIR__ . '/partials/footer.php'; ?>

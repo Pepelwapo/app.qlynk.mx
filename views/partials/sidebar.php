@@ -9,6 +9,7 @@
   <a href="/menus"><i class="bi bi-menu-button-wide me-2"></i>Menús</a>
   <a href="/catalogs"><i class="bi bi-collection me-2"></i>Catálogos</a>
   <a href="/forms"><i class="bi bi-ui-checks me-2"></i>Formularios</a>
+  <a href="/media"><i class="bi bi-images me-2"></i>Biblioteca de imágenes</a>
   <hr class="border-secondary mx-3 mt-auto">
   <a href="/billing"><i class="bi bi-credit-card me-2"></i>Facturación</a>
   <a href="/account"><i class="bi bi-person me-2"></i>Mi Cuenta</a>

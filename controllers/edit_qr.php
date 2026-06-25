@@ -26,6 +26,16 @@ if (!$qr) {
 // Parsear target_url → campos individuales (para pre-poblar el form)
 $fields = qr_parse_target_url($qr['type'], $qr['target_url'] ?? '');
 
+// Cargar carpetas/secciones del usuario para el selector "Mover a sección"
+$folders = [];
+try {
+    $stmtF = $pdo->prepare("SELECT id, name FROM qr_folders WHERE user_id = ? ORDER BY name ASC");
+    $stmtF->execute([$_SESSION['user_id']]);
+    $folders = $stmtF->fetchAll();
+} catch (Exception $e) {
+    // tabla qr_folders puede no existir aún
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // CSRF
@@ -55,15 +65,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $expires   = trim($_POST['expires_at'] ?? '');
     $expiresAt = (!empty($expires)) ? date('Y-m-d H:i:s', strtotime($expires)) : null;
 
-    $pdo->prepare("
-        UPDATE qr_codes
-        SET name       = ?,
-            target_url = ?,
-            type       = ?,
-            expires_at = ?,
-            updated_at = NOW()
-        WHERE id = ? AND user_id = ?
-    ")->execute([$name, $target_url, $type, $expiresAt, $id, $_SESSION['user_id']]);
+    // Colors — validated hex (#RRGGBB), fallback to existing or black/white
+    $darkColor  = preg_match('/^#[0-9a-fA-F]{6}$/', trim($_POST['dark_color']  ?? '')) ? strtoupper(trim($_POST['dark_color']))  : ($qr['dark_color']  ?? '#000000');
+    $lightColor = preg_match('/^#[0-9a-fA-F]{6}$/', trim($_POST['light_color'] ?? '')) ? strtoupper(trim($_POST['light_color'])) : ($qr['light_color'] ?? '#FFFFFF');
+
+    // Folder (mover a sección)
+    $folderId = !empty($_POST['folder_id']) ? (int)$_POST['folder_id'] : null;
+
+    try {
+        $pdo->prepare("
+            UPDATE qr_codes
+            SET name        = ?,
+                target_url  = ?,
+                type        = ?,
+                dark_color  = ?,
+                light_color = ?,
+                folder_id   = ?,
+                expires_at  = ?,
+                updated_at  = NOW()
+            WHERE id = ? AND user_id = ?
+        ")->execute([$name, $target_url, $type, $darkColor, $lightColor, $folderId, $expiresAt, $id, $_SESSION['user_id']]);
+    } catch (Exception $e) {
+        // Fallback: save without color/folder columns if they don't exist yet
+        $pdo->prepare("
+            UPDATE qr_codes
+            SET name       = ?,
+                target_url = ?,
+                type       = ?,
+                expires_at = ?,
+                updated_at = NOW()
+            WHERE id = ? AND user_id = ?
+        ")->execute([$name, $target_url, $type, $expiresAt, $id, $_SESSION['user_id']]);
+    }
 
     header('Location: /qrs/edit?id=' . $id . '&saved=1');
     exit;

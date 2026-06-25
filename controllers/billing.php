@@ -45,4 +45,9 @@ if (!empty($user['trial_end'])) {
     $trialDaysLeft = max(0, (int)ceil($diff / 86400));
 }
 
+// All active plans for the "planes disponibles" section
+$stmt = $pdo->prepare("SELECT * FROM plans WHERE is_active = 1 ORDER BY sort_order ASC, price ASC");
+$stmt->execute();
+$plans = $stmt->fetchAll();
+
 require __DIR__ . '/../views/billing.php';

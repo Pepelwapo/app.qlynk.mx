@@ -164,6 +164,10 @@ require __DIR__ . '/partials/head.php';
               <label class="form-label" style="font-size:11px;font-weight:600;color:#888;margin-bottom:3px">DESCRIPCIÓN</label>
               <input type="text" name="item_desc" class="form-control form-control-sm" style="border-radius:8px" placeholder="Descripción del producto">
             </div>
+            <div class="col-12 mt-1">
+              <label class="form-label" style="font-size:11px;font-weight:600;color:#888;margin-bottom:3px">URL DE IMAGEN <span style="font-weight:400;color:#aaa">(opcional — pega desde tu <a href="/media" target="_blank">Biblioteca</a>)</span></label>
+              <input type="url" name="item_image_url" class="form-control form-control-sm" style="border-radius:8px" placeholder="https://app.qlynk.mx/uploads/images/...">
+            </div>
             <div class="col-md-4">
               <label class="form-label" style="font-size:11px;font-weight:600;color:#888;margin-bottom:3px">CATEGORÍA</label>
               <select name="category_id" class="form-select form-select-sm" style="border-radius:8px">

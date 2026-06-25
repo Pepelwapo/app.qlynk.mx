@@ -151,6 +151,16 @@ switch ($uri) {
         require __DIR__.'/../controllers/billing.php';
         break;
 
+    // ── Biblioteca de imágenes ──
+    case '/media':
+        require __DIR__.'/../controllers/media.php';
+        break;
+
+    // ── Términos y condiciones ──
+    case '/terminos':
+        require __DIR__.'/../controllers/terminos.php';
+        break;
+
     // ── Cuenta ──
     case '/verify-email':
         require __DIR__.'/../controllers/verify_email.php';

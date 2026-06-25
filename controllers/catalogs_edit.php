@@ -72,18 +72,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
 
             case 'add_item':
-                $cid   = (int)($_POST['category_id']  ?? 0) ?: null;
-                $iname = trim($_POST['item_name']     ?? '');
-                $idesc = trim($_POST['item_desc']     ?? '');
-                $price = trim($_POST['item_price']    ?? '');
-                $sku   = trim($_POST['item_sku']      ?? '');
+                $cid    = (int)($_POST['category_id']  ?? 0) ?: null;
+                $iname  = trim($_POST['item_name']     ?? '');
+                $idesc  = trim($_POST['item_desc']     ?? '');
+                $price  = trim($_POST['item_price']    ?? '');
+                $sku    = trim($_POST['item_sku']      ?? '');
+                $imgUrl = trim($_POST['item_image_url'] ?? '');
                 if (!empty($iname)) {
                     $priceVal = ($price !== '') ? (float)$price : null;
+                    $imgVal   = !empty($imgUrl) ? $imgUrl : null;
                     $cntStmt  = $pdo->prepare("SELECT COUNT(*) FROM catalog_items WHERE catalog_id = ?");
                     $cntStmt->execute([$id]);
                     $cnt = (int)$cntStmt->fetchColumn();
-                    $pdo->prepare("INSERT INTO catalog_items (catalog_id, category_id, name, description, price, sku, active, sort_order) VALUES (?,?,?,?,?,?,1,?)")
-                        ->execute([$id, $cid, $iname, $idesc, $priceVal, $sku ?: null, $cnt]);
+                    try {
+                        $pdo->prepare("INSERT INTO catalog_items (catalog_id, category_id, name, description, image_url, price, sku, active, sort_order) VALUES (?,?,?,?,?,?,?,1,?)")
+                            ->execute([$id, $cid, $iname, $idesc, $imgVal, $priceVal, $sku ?: null, $cnt]);
+                    } catch (Exception $e) {
+                        // image_url column may not exist yet
+                        $pdo->prepare("INSERT INTO catalog_items (catalog_id, category_id, name, description, price, sku, active, sort_order) VALUES (?,?,?,?,?,?,1,?)")
+                            ->execute([$id, $cid, $iname, $idesc, $priceVal, $sku ?: null, $cnt]);
+                    }
                     $success = 'Producto agregado.';
                 }
                 break;

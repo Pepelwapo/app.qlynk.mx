@@ -75,17 +75,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
 
             case 'add_item':
-                $sid   = (int)($_POST['section_id']   ?? 0);
-                $iname = trim($_POST['item_name']     ?? '');
-                $idesc = trim($_POST['item_desc']     ?? '');
-                $price = trim($_POST['item_price']    ?? '');
+                $sid      = (int)($_POST['section_id']   ?? 0);
+                $iname    = trim($_POST['item_name']     ?? '');
+                $idesc    = trim($_POST['item_desc']     ?? '');
+                $price    = trim($_POST['item_price']    ?? '');
+                $imgUrl   = trim($_POST['item_image_url'] ?? '');
                 if ($sid && !empty($iname)) {
                     $priceVal = ($price !== '') ? (float)$price : null;
+                    $imgVal   = !empty($imgUrl) ? $imgUrl : null;
                     $cntStmt  = $pdo->prepare("SELECT COUNT(*) FROM menu_items WHERE section_id = ?");
                     $cntStmt->execute([$sid]);
                     $cnt = (int)$cntStmt->fetchColumn();
-                    $pdo->prepare("INSERT INTO menu_items (section_id, name, description, price, active, sort_order) VALUES (?,?,?,?,1,?)")
-                        ->execute([$sid, $iname, $idesc, $priceVal, $cnt]);
+                    try {
+                        $pdo->prepare("INSERT INTO menu_items (section_id, name, description, image_url, price, active, sort_order) VALUES (?,?,?,?,?,1,?)")
+                            ->execute([$sid, $iname, $idesc, $imgVal, $priceVal, $cnt]);
+                    } catch (Exception $e) {
+                        // image_url column may not exist yet
+                        $pdo->prepare("INSERT INTO menu_items (section_id, name, description, price, active, sort_order) VALUES (?,?,?,?,1,?)")
+                            ->execute([$sid, $iname, $idesc, $priceVal, $cnt]);
+                    }
                     $success = 'Platillo agregado.';
                 }
                 break;
